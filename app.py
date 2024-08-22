@@ -80,6 +80,7 @@ def index():
         logging.error("No se pudieron obtener los datos en tiempo real.")
     return render_template('index.html', data=data)
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    if __name__ == '__main__':
+    app.run()
+
 
