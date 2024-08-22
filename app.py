@@ -28,6 +28,7 @@ def convert_to_float(value):
 
 @cache.cached(timeout=300, key_prefix='weather_data')
 def obtener_datos_en_tiempo_real():
+    logging.info("Iniciando la recolección de datos en tiempo real.")
     try:
         options = Options()
         options.add_argument("--headless")
@@ -41,6 +42,7 @@ def obtener_datos_en_tiempo_real():
         for row in rows[1:]:
             cols = row.find_elements(By.TAG_NAME, "td")
             cols = [fix_encoding_issues(col.text.strip()) for col in cols]
+            logging.info(f"Procesando fila: {cols}")
             if len(cols) == 5:
                 fecha_hora = cols[1].split(' ')
                 data[cols[0]] = {
@@ -54,7 +56,7 @@ def obtener_datos_en_tiempo_real():
         logging.info('Datos raspados exitosamente.')
         return data
     except Exception as e:
-        logging.error(f"Error durante el scraping: {e}")
+        logging.error(f"Error durante el scraping: {e}", exc_info=True)
         return {}
     finally:
         driver.quit()
@@ -74,8 +76,10 @@ def api_todos_los_datos():
 @app.route('/')
 def index():
     data = obtener_datos_en_tiempo_real()
+    if not data:
+        logging.error("No se pudieron obtener los datos en tiempo real.")
     return render_template('index.html', data=data)
 
 if __name__ == '__main__':
-    pass
+    app.run(debug=True)
 
